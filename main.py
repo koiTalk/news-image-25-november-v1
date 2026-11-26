@@ -7,10 +7,12 @@ Deterministic: same bytes every run, no timestamps, no randomness,
 no network. Paths resolve from this file's own location, never CWD.
 Output: $MAKEFUN_OUTPUT_DIR/entry.png, else /output/entry.png.
 
-All facts come from NEWS_25NOV.md (56 stories first reported 25 Nov
-2026: 3 lead + 12 medium + 41 also-today). Unverified claims are
-marked with * and labelled as claims. No 24 Nov story is presented
-as a 25 Nov story.
+All facts come from NEWS_25NOV.md (stories first reported 25 Nov
+2026: 3 lead + 12 medium + 22 also-today = 37). The also-today
+section keeps only the most consequential of the file's 41
+also-today stories; celebrity, routine sports and king-tide items
+were cut. Unverified claims are marked with * and labelled as
+claims. No 24 Nov story is presented as a 25 Nov story.
 """
 
 import os
@@ -345,30 +347,37 @@ CONTINENTS = [
     # New Zealand
     [(167, -45), (170, -42), (173, -40), (175, -38), (177, -38),
      (175, -41), (172, -43), (168, -46), (167, -45)],
-    # Antarctica (schematic strip)
-    [(-180, -70), (-120, -70), (-60, -70), (0, -70), (60, -70),
-     (120, -70), (180, -70), (180, -78), (120, -78), (60, -78),
-     (0, -78), (-60, -78), (-120, -78), (-180, -78)],
+    # Antarctica (schematic, wavy coastline — not a flat bar)
+    [(-180, -68), (-150, -71), (-120, -67), (-90, -70), (-60, -68),
+     (-30, -71), (0, -67), (30, -70), (60, -68), (90, -71),
+     (120, -67), (150, -70), (180, -68), (180, -80), (150, -78),
+     (120, -81), (90, -79), (60, -81), (30, -78), (0, -80),
+     (-30, -78), (-60, -81), (-90, -79), (-120, -81), (-150, -78),
+     (-180, -80)],
 ]
 
-# Pins for stories 1-15: (number, lon, lat, dx, dy) — dx/dy nudge the
-# drawn pin away from its true spot when two pins would collide.
+# Pins for stories 1-15: (number, lon, lat, dx, dy). Every pin is
+# placed from its true longitude/latitude through lonlat() below
+# (equirectangular: lon -180..180 -> x, lat 90..-90 -> y). dx/dy
+# nudge the drawn pin away from its true spot ONLY where pins
+# would collide (1, 3, 7, 15); draw_pin draws a leader line from
+# the true spot (small red dot) to the offset pin.
 PINS = [
-    (1, -77, 39, 0, 0),
-    (2, -74, 40.7, 0, 0),
-    (3, 47, 29, 0, 0),
-    (4, 100, 40, 0, 0),
-    (5, 160, -9.6, 0, 0),
-    (6, 35.2, 31.8, 0, 0),
-    (7, 31.2, 30, 0, 0),
-    (8, -75.5, 10.4, 0, 0),
-    (9, 106.8, -6.6, 0, 0),
-    (10, 42.3, 55.7, 0, 0),
-    (11, 19, 52, 0, 0),
-    (12, 34.5, 11.5, 0, 0),
-    (13, 90.4, 23.8, 0, 0),
-    (14, -122, 37.4, 0, 0),
-    (15, -74, 40.7, 20, -18),  # shares NYC with pin 2; offset with leader
+    (1, -77.0, 38.9, -24, 8),    # Washington DC; offset W, leader to DC
+    (2, -74.0, 40.7, 0, 0),     # New York City
+    (3, 34.5, 31.5, -18, -20),  # Gaza City; offset NW, leader to Gaza
+    (4, 100.3, 39.7, 0, 0),     # Jiuquan
+    (5, 160.0, -9.4, 0, 0),     # Honiara
+    (6, 35.2, 31.8, 0, 0),      # Jerusalem
+    (7, 31.2, 30.0, -26, 24),   # Cairo; offset SW, leader to Cairo
+    (8, -75.5, 10.4, 0, 0),     # Cartagena
+    (9, 106.8, -6.6, 0, 0),     # Bogor
+    (10, 43.7, 55.6, 0, 0),     # Savasleyka airbase
+    (11, 21.0, 52.2, 0, 0),     # Warsaw
+    (12, 34.5, 11.8, 0, 0),     # Damazin
+    (13, 90.4, 23.8, 0, 0),     # Dhaka
+    (14, -122.0, 37.4, 0, 0),   # Santa Clara
+    (15, -73.0, 41.2, 18, -8),  # NYC parade; anchor E of pin 2, offset NE
 ]
 
 # ---------------------------------------------------------------- stories
@@ -404,48 +413,33 @@ MEDIUM = [
     (15, "Macy's parade postponed to Sat 28 Nov by storm"),
 ]
 
-# Also-today stories 16-56, one short line each.
+# Also-today stories: the 22 most consequential of the file's 41.
+# Cut: celebrity (55), routine sports results (50-52), king tides
+# (53), near-duplicates of lead stories (21, 23), single-source
+# unverified claims (30), and low-consequence items (27, 31-33,
+# 38, 42, 44-45, 48-49). One short line each, drawn at scale 2.
 ALSO = [
     (16, "N. Korea expels Swiss diplomat"),
-    (17, "UK warns firms of Russian sabotage threat"),
-    (18, "Two Libyan officers die in Ukraine strike"),
-    (19, "Iraq court backs federal border control"),
-    (20, "Saudi coalition strikes Hodeidah port"),
-    (21, "Saudi coalition downs Houthi drones"),
+    (17, "UK warns firms of Russian sabotage"),
+    (18, "Two Libyan officers die in strike"),
+    (19, "Iraq court backs federal control"),
+    (20, "Saudi coalition strikes Hodeidah"),
     (22, "Houthis advance on Aden"),
-    (23, "US tells citizens to leave Iran"),
-    (24, "Leaked data: 490,334+ Russian war dead*"),
+    (24, "Leaked data: 490,334 Russian dead*"),
     (25, "Ukraine needs EUR 115bn for 2027"),
-    (26, "Six dead in plane crash off Mississippi"),
-    (27, "US Army detonates 4,400 kg of explosives"),
-    (28, "Russian strikes kill civilians in Odesa, Kyiv"),
-    (29, "Russian strikes hit Ukraine energy system"),
-    (30, "Ukraine claims laser downed a drone*"),
-    (31, "Eisenkot secures first coalition partner"),
-    (32, "Vance: Nvidia's Huang needs no pardon"),
-    (33, "Sen. Booker demands Nvidia answers"),
-    (34, "Judge blocks birthright-citizenship order"),
+    (28, "Russian strikes kill civilians"),
+    (29, "Russian strikes hit Ukraine energy"),
+    (34, "Judge blocks birthright order"),
     (35, "Abrego Garcia leaves US for Spain"),
-    (36, "Microsoft 'Code Red' after worst outage"),
-    (37, "CrowdStrike to buy Zscaler for $43.9bn"),
-    (38, "Dell: record $132.3bn AI-server backlog"),
-    (39, "Brain organoids in space: Alzheimer's clues"),
-    (40, "Oil jumps: Brent $94.61 on supply fears"),
-    (41, "Rupiah hits record low 18,332 per dollar"),
-    (42, "Bank Indonesia sees rate at 6% in 2027"),
-    (43, "Indonesia: trade deal shields it from tariffs"),
-    (44, "Prabowo orders Garuda Indonesia revamp"),
-    (45, "Indonesia blue-economy investment $5.1bn"),
-    (46, "Nigeria: militants kill 30 in Niger State*"),
-    (47, "Pope Leo XIV: concern over COP31 failure"),
-    (48, "Germany's Merz accuses Russia"),
-    (49, "34 nations urge Moscow: stop riot gas"),
-    (50, "Man Utd held 2-2 at Sporting"),
-    (51, "Liverpool win 3-0 at Club Brugge"),
-    (52, "Lille stun Bayern 2-1; PSG held 2-2"),
-    (53, "California king tides flood the coast"),
-    (54, "East Coast storm: emergencies declared"),
-    (55, "Jolie and Pitt settle winery battle"),
+    (36, "Microsoft 'Code Red' after outage"),
+    (37, "CrowdStrike to buy Zscaler $43.9bn"),
+    (39, "Brain organoids: Alzheimer's clues"),
+    (40, "Oil jumps: Brent $94.61 a barrel"),
+    (41, "Rupiah hits record low vs dollar"),
+    (43, "Indonesia: trade deal shields it"),
+    (46, "Nigeria: militants kill 30*"),
+    (47, "Pope: concern over COP31 failure"),
+    (54, "East Coast storm: emergencies"),
     (56, "Met Police: racism, misogyny persist"),
 ]
 
@@ -473,7 +467,7 @@ def build():
     cv.fill_rect(0, MAP_Y0 - 4, W, 4, GOLD)
     draw_text_centered(cv, W // 2, 10, "25 NOVEMBER 2026", 6, WHITE)
     draw_text_centered(cv, W // 2, 56,
-                       "WORLD NEWS IN ONE IMAGE - 56 STORIES - PINS 1-15 ON THE MAP",
+                       "WORLD NEWS IN ONE IMAGE - 37 STORIES - PINS 1-15 ON THE MAP",
                        1, (200, 214, 230))
 
     # ---- map
@@ -491,7 +485,7 @@ def build():
     cv.fill_rect(0, MAP_Y1 - 2, W, 2, GREY_LINE)
 
     # ---- lead stories: 3 boxes
-    box_y, box_h, box_w = 408, 184, 324
+    box_y, box_h, box_w = 408, 156, 324
     for i, (num, head, detail) in enumerate(LEAD):
         x = 12 + i * (box_w + 14)
         cv.fill_rect(x, box_y, box_w, box_h, WHITE)
@@ -515,29 +509,29 @@ def build():
             y += 11
 
     # ---- medium stories: heading + 2 columns x 6 rows
-    draw_text(cv, 12, 606, "THE DAY IN BRIEF - 12 MORE STORIES", 2, NAVY)
-    cv.hline(12, W - 12, 626, GREY_LINE)
+    draw_text(cv, 12, 576, "THE DAY IN BRIEF - 12 MORE STORIES", 2, NAVY)
+    cv.hline(12, W - 12, 596, GREY_LINE)
     for i, (num, text) in enumerate(MEDIUM):
         col = i % 2
         row = i // 2
         x = 12 + col * 506
-        y = 636 + row * 27
+        y = 606 + row * 24
         cv.fill_circle(x + 9, y + 4, 9, NAVY2)
         draw_text(cv, x + 9 - text_width(str(num), 1) // 2, y + 1,
                   str(num), 1, WHITE)
         for j, line in enumerate(wrap_text(text, 1, 462)):
             draw_text(cv, x + 24, y + j * 11, line, 1, INK)
 
-    # ---- also today: heading + 3 columns x 14 rows
-    draw_text(cv, 12, 800, "ALSO TODAY - 41 MORE  * = CLAIM, UNVERIFIED",
+    # ---- also today: 2 columns x 11 rows, scale 2 (twice v1's size)
+    draw_text(cv, 12, 748, "ALSO TODAY - 22 MORE  * = CLAIM, UNVERIFIED",
               2, NAVY)
-    cv.hline(12, W - 12, 820, GREY_LINE)
+    cv.hline(12, W - 12, 768, GREY_LINE)
     for i, (num, text) in enumerate(ALSO):
-        col = i % 3
-        row = i // 3
-        x = 12 + col * 338
-        y = 830 + row * 13
-        draw_text(cv, x, y, "%d. %s" % (num, text), 1, INK)
+        col = i % 2
+        row = i // 2
+        x = 12 + col * 506
+        y = 778 + row * 19
+        draw_text(cv, x, y, "%d. %s" % (num, text), 2, INK)
 
     # ---- footer
     draw_text_centered(cv, W // 2, 1012,
